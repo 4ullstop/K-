@@ -33,63 +33,77 @@ void PrintXMVector(FXMVECTOR v)
     OutputDebugString(buffer);
 }
 
+void PrintXMMatrix(CXMMATRIX m)
+{
+    //Store the matrix in a 4x4 float
+    XMFLOAT4X4 mat;
+    XMStoreFloat4x4(&mat, m);
+    
+    for (int i = 0; i < 4; ++i)
+    {
+	for (int j = 0; j < 4; ++j)
+	{
+	    //access the value from the stored matrix bc CXMMATRIX is different than XMMATRIX which
+	    //would allow for easier accessing but we passed it in as a parameter
+	    float dest = ((float*)&mat)[i * 4 + j];
+
+	    char buffer[256];
+	    sprintf_s(buffer, sizeof(buffer),
+		      "%f, ", dest);
+	    OutputDebugString(buffer);
+	}
+	OutputDebugString("\n");
+    }
+}
+
 int CALLBACK WinMain(HINSTANCE hInstance,
 		     HINSTANCE hPrevInstance,
 		     LPSTR lpCmdLine,
 		     int nCmdShow)
 {
-    XMVECTOR n = XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
-    XMVECTOR u = XMVectorSet(1.0f, 2.0f, 3.0f, 0.0f);
-    XMVECTOR v = XMVectorSet(-2.0f, 1.0f, -3.0f, 0.0f);
-    XMVECTOR w = XMVectorSet(0.707f, 0.707f, 0.0f, 0.0f);
+    XMMATRIX a(1.0f, 0.0f, 0.0f, 0.0f,
+	       0.0f, 2.0f, 0.0f, 0.0f,
+	       0.0f, 0.0f, 4.0f, 0.0f,
+	       1.0f, 2.0f, 3.0f, 1.0f);
 
-    XMVECTOR a = u + v;
-    XMVECTOR b = u - v;
+    XMMATRIX b = XMMatrixIdentity();
 
-    XMVECTOR c = 10.0f * u;
+    XMMATRIX c = a * b;
 
-    XMVECTOR l = XMVector3Length(u);
-    XMVECTOR d = XMVector3Normalize(u);
-    XMVECTOR s = XMVector3Dot(u, v);
-    XMVECTOR e = XMVector3Cross(u, v);
+    XMMATRIX d = XMMatrixTranspose(a);
 
-    XMVECTOR projW;
-    XMVECTOR perpW;
+    XMVECTOR det = XMMatrixDeterminant(a);
+    XMMATRIX e = XMMatrixInverse(&det, a);
 
-    XMVector3ComponentsFromNormal(&projW, &perpW, w, n);
+    XMMATRIX f = a * e;
 
-    bool32 equal = XMVector3Equal(projW + perpW, w) != 0;
-    bool32 notEqual = XMVector3NotEqual(projW + perpW, w) != 0;
+    OutputDebugString("a: ");            
+    PrintXMMatrix(a);
+    OutputDebugString("\n");
 
-    XMVECTOR angleVec = XMVector3AngleBetweenVectors(projW, perpW);
-    r32 angleRadians = XMVectorGetX(angleVec);
-    r32 angleDegrees = XMConvertToDegrees(angleRadians);
+    OutputDebugString("b: ");            
+    PrintXMMatrix(b);
+    OutputDebugString("\n");
 
-    PrintXMVector(u);
-    PrintXMVector(v);    
-    PrintXMVector(w);
-    PrintXMVector(n);
-    PrintXMVector(a);
-    PrintXMVector(b);
-    PrintXMVector(c);
-    PrintXMVector(d);
-    PrintXMVector(e);
-    PrintXMVector(l);
-    PrintXMVector(s);
-    PrintXMVector(projW);
-    PrintXMVector(perpW);
+    OutputDebugString("c: ");            
+    PrintXMMatrix(c);
+    OutputDebugString("\n");
 
-    if (equal) OutputDebugString("projW + perpW == w = true\n");
-    else OutputDebugString("projW + perpW == w = false\n");	
+    OutputDebugString("d: ");            
+    PrintXMMatrix(d);
+    OutputDebugString("\n");
 
-    if (notEqual) OutputDebugString("projW + perpW != w = true\n");
-    else OutputDebugString("projW + perpW != w = false\n");
-
-    char r32Buffer[256];
-    sprintf_s(r32Buffer, sizeof(r32Buffer),
-	      "angle: %f\n", angleDegrees);
-    OutputDebugString(r32Buffer);
+    OutputDebugString("det: ");            
+    PrintXMVector(det);
+    OutputDebugString("\n");
     
+    OutputDebugString("e: ");            
+    PrintXMMatrix(e);
+    OutputDebugString("\n");
+
+    OutputDebugString("f: ");        
+    PrintXMMatrix(f);
+    OutputDebugString("\n");    
     return(0);
 }
 
