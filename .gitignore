@@ -1,4 +1,4 @@
-.vs
-.pbd
-.obj
-.db
+*.vs
+*.pbd
+*.obj
+*.db

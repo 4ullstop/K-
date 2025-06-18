@@ -434,7 +434,7 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 		return false;
 	    }
 
-	    renderInfo.enable4xMsaa = true;
+
 
 	    //Now we check the support for 4X MSAA quality
 
@@ -442,7 +442,8 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 		   DXGI_FORMAT_R8G8B8A8_UNORM, 4, &renderInfo.msaaQuality));
 
 	    Assert(renderInfo.msaaQuality > 0);
-
+	    renderInfo.enable4xMsaa = renderInfo.msaaQuality;
+	    
 	    //Next we fill out some info necessary to create the swap chain
 	    DXGI_SWAP_CHAIN_DESC sd;
 	    sd.BufferDesc.Width = windowInfo.clientWidth;
@@ -488,6 +489,73 @@ int CALLBACK WinMain(HINSTANCE hInstance,
 
 	    HR(dxgiFactory->CreateSwapChain(chainInfo.d3dDevice, &sd, &chainInfo.swapChain));
 
+#if 1    
+	    //Turn off the ability alt enter to full screen the app
+	    HR(dxgiFactory->MakeWindowAssociation(windowHandle, DXGI_MWA_NO_WINDOW_CHANGES));
+
+	    //My system has 3 adapters (starting at 0)
+	    HRESULT rresult = dxgiFactory->EnumAdapters(0, &dxgiAdapter);
+	    UINT numModes;
+	    IDXGIOutput* adapter1Output_01 = {};
+	    dxgiAdapter->EnumOutputs(0, &adapter1Output_01);
+	    DXGI_MODE_DESC displayModeDesc;
+	    adapter1Output_01->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM,
+						  0,
+						  &numModes,
+						  &displayModeDesc);
+	    
+	    OutputDebugString("Adapter 1:\n");
+
+	    {
+		char wordBuffer[256];
+		sprintf_s(wordBuffer, "Width = %d, Height = %d, Refresh = %d/%d\n",
+			  displayModeDesc.Width, displayModeDesc.Height, displayModeDesc.RefreshRate.Numerator, displayModeDesc.RefreshRate.Denominator);
+		OutputDebugString(wordBuffer);
+	    }
+	    
+	    
+	    HRESULT rresult2 = dxgiFactory->EnumAdapters(1, &dxgiAdapter);
+	    IDXGIOutput* adapter2Output_01 = {};
+	    dxgiAdapter->EnumOutputs(1, &adapter2Output_01);	    
+	    adapter2Output_01->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM,
+						  0,
+						  &numModes,
+						  &displayModeDesc);
+
+	    OutputDebugString("Adapter 2:\n");	    
+	    {
+		char wordBuffer[256];
+		OutputDebugString("Output 1\n");
+		sprintf_s(wordBuffer, "Width = %d, Height = %d, Refresh = %d/%d\n",
+			  displayModeDesc.Width, displayModeDesc.Height, displayModeDesc.RefreshRate.Numerator, displayModeDesc.RefreshRate.Denominator);
+		OutputDebugString(wordBuffer);
+	    }	    
+	    IDXGIOutput* adapter2Output_02 = {};
+	    dxgiAdapter->EnumOutputs(1, &adapter2Output_02);	    
+	    OutputDebugString("Output 2\n");	    
+	    adapter2Output_02->GetDisplayModeList(DXGI_FORMAT_R8G8B8A8_UNORM,
+						  0,
+						  &numModes,
+						  &displayModeDesc);	    	    
+	    {
+		char wordBuffer[256];
+		OutputDebugString("Output 2\n");
+		sprintf_s(wordBuffer, "Width = %d, Height = %d, Refresh = %d/%d\n",
+			  displayModeDesc.Width, displayModeDesc.Height, displayModeDesc.RefreshRate.Numerator, displayModeDesc.RefreshRate.Denominator);
+		OutputDebugString(wordBuffer);
+	    }	    
+	    LARGE_INTEGER versionCheck;
+
+	    IDXGIOutput* output;
+	    HRESULT enumOutputResult;
+	    for (UINT i = 0; i < 5; ++i)
+	    {
+		enumOutputResult  = dxgiAdapter->EnumOutputs(i, &output);
+	    }
+	    HRESULT interfaceResult;
+	    interfaceResult = dxgiAdapter->CheckInterfaceSupport(__uuidof(IDXGIDevice), &versionCheck); 
+	    
+#endif	    
 	    //Release our acquired COM interfaces2
 	    ReleaseCOM(dxgiDevice);
 	    ReleaseCOM(dxgiAdapter);
